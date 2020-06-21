@@ -1,5 +1,5 @@
 
-public class MoveZeroes {
+public class MoveZeros {
 
   public void moveZeroes(int[] nums) {
 

@@ -133,28 +133,28 @@ def BFS(graph, start, end):
 
 ### 主要变量
 - 用于存储<key,value>节点的表，也称作桶，第一次初始化后，有必要会扩容，容量保持为2的指数
-```
+```java
 transient Node<K,V>[] table;
 ```
 - 同时封装了keySet和values的视图，作用类似AbstractMap中的keySet + values
-```
+```java
 transient Set<Map.Entry<K,V>> entrySet;
 ```
 - 容器中实际存放的Node数量
-```
+```java
 transient int size;
 ```
 - HashMap在结构上被修改的次数，包括改变hashmap中的映射，或者其他方式比如rehash；
 此字段用于使hashmap集合视图上的迭代器失效ConcurrentModificationException
-```
+```java
 transient int modCount;
 ```
 - 下一个需要扩容的阈值，=capacity*loadFactor， 这里的capacity就是当前的buckets容量大小，一般情况是table数组的大小。
-```
+```java
 int threshold;
 ```
 - 装载因子，buckets被填满的比例。主要是为了计算得到threshold。
-```
+```java
 final float loadFactor;
 ```
 
@@ -168,8 +168,74 @@ final float loadFactor;
 
 ### 主要api
 #### 1. 初始化-构造方法
+初始化，也就是HashMap的构造方法
+- 默认构造：
+
+```java
+/**
+* 构造一个空的 HashMap，其 capacity 默认为 16，load factor 默认为 0.75
+*/
+public HashMap() {
+    this.loadFactor = DEFAULT_LOAD_FACTOR; 
+}
+```
+- 重载构造
+
+```java
+/**
+* 指定 capacity 大小，但 load factor 默认为 0.75
+*/
+public HashMap(int initialCapacity) {
+        this(initialCapacity, DEFAULT_LOAD_FACTOR);
+}
+/**
+* 同时指定 capacity 和 load factor 的大小，并且同时计算出 threshold 的值 
+*/
+public HashMap(int initialCapacity, float loadFactor) {
+    if (initialCapacity < 0)
+        throw new IllegalArgumentException("Illegal initial capacity: " +
+                                           initialCapacity);
+    if (initialCapacity > MAXIMUM_CAPACITY)
+        initialCapacity = MAXIMUM_CAPACITY;
+    if (loadFactor <= 0 || Float.isNaN(loadFactor))
+        throw new IllegalArgumentException("Illegal load factor: " +
+                                           loadFactor);
+    this.loadFactor = loadFactor;
+    // 相比jdk1.7有算法优化：约束 threshold 的大小应该为 2 的 n 次幂 
+    this.threshold = tableSizeFor(initialCapacity);
+}
+```
+- 此处threshold大小约束的实现稍后详述。
+- 根据以上的构造实现，就实际的场景下，**如能预期其大小或者预期未来的变化率，最好在初始化时就指定capacity和和loadFactor，就能有效减少内存的分配和扩容的开销，提升使用效率。**
 
 #### 2. 插入-put(k,v)方法
+```java
+/**
+* 使 key 和 value 产生关联，但如果有相同的 key 则新的会替换掉旧的
+*/
+public V put(K key, V value) {
+    return putVal(hash(key), key, value, false, true);
+}
+```
+
+put方法在这里做了两步操作，一个是调用哈希函数hash(key) 计算key对应的hash码，然后进一步调用putVal方法；这里先看hash(key)：
+
+```java
+static final int hash(Object key) {
+    int h;
+  	// 如果key为null，返回的就是0，否则就是hashCode异或其无符号位右移16位的结果
+    return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
+}
+```
+
+根据注释的hash值计算方法，得到的结果就是hashCode高16位不变，低16位于高16位做一个异或。**其目的是同时把高16位和低16位的影响都考虑进来，尽量减少HashMap的哈希冲突。**
+当然也与HashMap计算散列后的index方法有关，在putVal中有：
+
+```
+i = (n-1) & hash
+```
+
+
 
 #### 3. 遍历-entrySet()方法
 

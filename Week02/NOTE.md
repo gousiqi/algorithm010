@@ -121,5 +121,69 @@ def BFS(graph, start, end):
 - [ ] [最短路径](https://www.bilibili.com/video/av25829980?from=search&seid=13391343514095937158)
 - [ ] [最小生成树](https://www.bilibili.com/video/av84820276?from=search&seid=17476598104352152051)
 
-## 总结：HashMap源码解析（待完成）
+## 本周小总结：HashMap源码解析（待完善）
 
+### 概述
+1. 根据jdk官方文档的说明，hashmap是基于散列表，对map接口的一种实现，数据结构是“链表散列”，即数组+链表，底层是基于散列算法实现。
+2. key唯一，value可重复，允许null键与null值，元素是无序的。
+3. HashMap继承自抽象类AbstractMap，实现了Map接口，Map接口规范了作为一个key-value类应该具有的基本api，比如**get(),put(),remove()**，以及用来管理内部数据的视图**keySet(),values(),entrySet()**。同时还定义用于抽象key-value的Entry接口。
+    - JDK1.8开始，通过关键字default，Map接口中也提供了一些方法的默认实现。
+4. 需要注意的是，hashmap非线程安全，多线程环境易出现问题。
+5. 本篇源码分析主要针对**jdk1.8版本**，其相较于之前版本的主要不同之处会略有提及。
+
+### 主要变量
+- 用于存储<key,value>节点的表，也称作桶，第一次初始化后，有必要会扩容，容量保持为2的指数
+```
+transient Node<K,V>[] table;
+```
+- 同时封装了keySet和values的视图，作用类似AbstractMap中的keySet + values
+```
+transient Set<Map.Entry<K,V>> entrySet;
+```
+- 容器中实际存放的Node数量
+```
+transient int size;
+```
+- HashMap在结构上被修改的次数，包括改变hashmap中的映射，或者其他方式比如rehash；
+此字段用于使hashmap集合视图上的迭代器失效ConcurrentModificationException
+```
+transient int modCount;
+```
+- 下一个需要扩容的阈值，=capacity*loadFactor， 这里的capacity就是当前的buckets容量大小，一般情况是table数组的大小。
+```
+int threshold;
+```
+- 装载因子，buckets被填满的比例。主要是为了计算得到threshold。
+```
+final float loadFactor;
+```
+
+### 代码分析
+- HashMap的主要操作中，按照基本的顺序，可参考如下时序图：
+
+  ![avatar](1.jpg)
+
+
+- 根据时序图的顺序，逐步分析主要api。
+
+### 主要api
+#### 1. 初始化-构造方法
+
+#### 2. 插入-put(k,v)方法
+
+#### 3. 遍历-entrySet()方法
+
+#### 4. get()
+
+#### 5. remove()
+
+
+### 总结
+#### 1. 
+
+#### 2. 
+
+#### 3.
+
+#### 4. HashMap与HashTable
+#### 5. HashMap与ConCurrentHashMap

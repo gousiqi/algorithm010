@@ -4,7 +4,7 @@
 
 ### 数据结构
 #### 图示
-1.png
+![avatar](1.png)
 #### 代码实现
 ```java
 class Trie {
@@ -36,7 +36,7 @@ class Trie {
 ## 并查集
 ### 数据结构
 #### 图示
-2.png
+![avatar](2.png)
 #### 代码实现
 ```java
 class Unions {
@@ -87,7 +87,7 @@ class Unions {
 
 ### 双向bfs
 #### 特点与特性
-3.png
+![avatar](3.png)
 #### 代码模板
 ```java
 class Model {
